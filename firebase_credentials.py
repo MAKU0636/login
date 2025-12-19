@@ -27,11 +27,21 @@ class FirestoreData:
         except Exception as e:
             logger.error(f"Error reading collection '{collection_name}': {e}")
             return []
-    async def update_collection(self, collection_name, data_list, key_field):
+    async def update_collection(self, collection_name, data, unique_field):
         try:
-            for data in data_list:
-                doc_id = data.get(key_field)
-                await asyncio.to_thread(self.db.collection(collection_name).document(doc_id).set, data)
-            logger.info(f"Updated {len(data_list)} documents in '{collection_name}'")
+            collection_ref = self.db.collection(collection_name)
+            for row in data:
+                symbol = row.get(unique_field)
+                if symbol is None:
+                    logger.warning(f"Row missing unique field '{unique_field}': {row}")
+                    continue
+                docs = await asyncio.to_thread(lambda: list(collection_ref.where(unique_field, "==", symbol).stream()))
+                found = False
+                for doc in docs:
+                    found = True
+                    await asyncio.to_thread(doc.reference.update, {k: v for k, v in row.items() if k != unique_field})
+                    logger.info(f"Updated document with {unique_field}: {symbol}")
+                if not found:
+                    logger.info(f"No document found with {unique_field}: {symbol}")
         except Exception as e:
             logger.error(f"Error updating collection '{collection_name}': {e}")

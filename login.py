@@ -170,9 +170,7 @@ async def perform_login():
         token = await fire.read_collection('api_tokens')
         brokers_today = {item['broker'] for item in token if item['date'] == today}
         new_tokens = []
-        success = []
-        failed = []
-        already_logged_in = []
+        success, failed, already_logged_in = [], [], []
         
         if 'upstox' not in brokers_today:
             try:
@@ -221,12 +219,7 @@ async def perform_login():
         if new_tokens:
             await fire.update_collection('api_tokens', new_tokens, 'broker')
         
-        return {
-            'status': 'success',
-            'login_successful': success,
-            'login_failed': failed,
-            'already_logged_in': already_logged_in
-        }
+        return {'status': 'success', 'login_successful': success, 'login_failed': failed, 'already_logged_in': already_logged_in}
     except Exception as e:
         logger.error(f"Error in perform_login: {str(e)}")
         return {'status': 'error', 'message': str(e)}
