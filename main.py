@@ -9,8 +9,28 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-@app.route('/login', methods=['POST', 'GET'])
+def get_cors_headers():
+    origin = '*'
+    if request and 'Origin' in request.headers:
+        origin = request.headers['Origin']
+    return {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin',
+        'Access-Control-Max-Age': '3600',
+        'Access-Control-Allow-Credentials': 'true'
+    }
+
+@app.after_request
+def after_request(response):
+    for key, value in get_cors_headers().items():
+        response.headers[key] = value
+    return response
+
+@app.route('/login', methods=['POST', 'GET', 'OPTIONS'])
 def login():
+    if request.method == 'OPTIONS':
+        return '', 204
     try:
         result = asyncio.run(perform_login())
         return jsonify(result), 200
