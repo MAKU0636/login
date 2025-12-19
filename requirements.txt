@@ -5,3 +5,4 @@ pyotp==2.9.*
 requests==2.*
 firebase-admin==6.5.*
 gunicorn==21.*
+pytz
