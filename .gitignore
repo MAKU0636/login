@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.log
+.env
+.venv
+venv/
+ENV/
+.DS_Store
+
+# Credentials - never commit
+firebase_credentials.json
