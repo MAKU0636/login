@@ -8,10 +8,14 @@ import json
 
 logger = logging.getLogger(__name__)
 
-# Load credentials from JSON file (kept outside version control)
-json_path = os.path.join(os.path.dirname(__file__), 'firebase_credentials.json')
-with open(json_path, 'r') as f:
-    firebase_cred = json.load(f)
+firebase_cred_json = os.environ.get('FIREBASE_CREDENTIALS')
+if not firebase_cred_json:
+    # Load from local file for development
+    json_path = os.path.join(os.path.dirname(__file__), 'firebase_credentials.json')
+    with open(json_path, 'r') as f:
+        firebase_cred = json.load(f)
+else:
+    firebase_cred = json.loads(firebase_cred_json)
 
 cred = credentials.Certificate(firebase_cred)
 if not firebase_admin._apps:
